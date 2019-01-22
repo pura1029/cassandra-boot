@@ -1,0 +1,3 @@
+Insert into Student(id,name,age) values('d4817b29-e898-4b65-911d-gk34d57b386e','Raju',22);
+Insert into Student(id,name,age,address) values('d8917b29-e078-4b65-911d-jk34d32b386e','Ranjan',25,{ city : 'Bang', street : 'Pk house', timestamps : [29293822, 3238283], zipcode : '560068' });
+INSERT INTO student JSON '{"name":"Ram","id":"d8917b29-e078-4b65-911d-jj98d32b654e","age":28,"marks":89,"address":{"city":"Bang","street":"Roop house","timestamps":[29227822,2828283],"zipcode":"560068"},"listofaddress":[{"city":"Bang","street":"Roop house","timestamps":[29227822,2828283],"zipcode":"560068"}]}';
