@@ -1,0 +1,14 @@
+.idea/
+target/
+.project
+.classpath
+.settings/
+.gitconfig
+logs/
+.metadata/
+.DS_Store
+.gitignore
+/fiaasco-core.iml
+fiaasco-services/rt
+test-output
+.recommenders/
