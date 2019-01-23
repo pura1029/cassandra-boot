@@ -16,29 +16,32 @@ package com.vmware.fiaasco.cassandra;
 import java.security.GeneralSecurityException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import com.datastax.driver.core.LatencyTracker;
+import com.datastax.driver.core.PoolingOptions;
 import com.datastax.driver.core.QueryLogger;
 import com.datastax.driver.core.QueryOptions;
 import com.datastax.driver.core.SSLOptions;
 import com.datastax.driver.core.SocketOptions;
-import com.datastax.driver.core.policies.ConstantReconnectionPolicy;
 import com.datastax.driver.core.policies.DCAwareRoundRobinPolicy;
+import com.datastax.driver.core.policies.ExponentialReconnectionPolicy;
 import com.datastax.driver.core.policies.LoadBalancingPolicy;
 import com.datastax.driver.core.policies.ReconnectionPolicy;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.context.properties.PropertyMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.cassandra.SessionFactory;
 import org.springframework.data.cassandra.config.CassandraSessionFactoryBean;
+import org.springframework.data.cassandra.config.CompressionType;
 import org.springframework.data.cassandra.config.SchemaAction;
 import org.springframework.data.cassandra.core.CassandraAdminTemplate;
 import org.springframework.data.cassandra.core.cql.session.DefaultSessionFactory;
@@ -232,7 +235,7 @@ public class CassandraConfig extends AbstractCassandraConfiguration {
 
     /**
      * SSL enabled or not.
-     * 
+     *
      * @return true/false
      */
     public boolean getSslEnabled() {
@@ -241,7 +244,7 @@ public class CassandraConfig extends AbstractCassandraConfiguration {
 
     /**
      * Get Username of db.
-     * 
+     *
      * @return
      */
     public String getUsername() {
@@ -250,7 +253,7 @@ public class CassandraConfig extends AbstractCassandraConfiguration {
 
     /**
      * Get Password of db.
-     * 
+     *
      * @return
      */
     public String getPassword() {
@@ -265,9 +268,11 @@ public class CassandraConfig extends AbstractCassandraConfiguration {
     @Nullable
     @Override
     public SocketOptions getSocketOptions() {
-        SocketOptions socketOptions = new SocketOptions();
-        socketOptions.setConnectTimeoutMillis(cassandraProperties.getConnectTimeout());
-        return socketOptions;
+        PropertyMapper map = PropertyMapper.get();
+        SocketOptions options = new SocketOptions();
+        map.from(this.cassandraProperties::getConnectTimeout).whenNonNull().to(options::setConnectTimeoutMillis);
+        map.from(this.cassandraProperties::getReadTimeout).whenNonNull().to(options::setReadTimeoutMillis);
+        return options;
     }
 
     /**
@@ -278,7 +283,7 @@ public class CassandraConfig extends AbstractCassandraConfiguration {
     @Nullable
     @Override
     public ReconnectionPolicy getReconnectionPolicy() {
-        return new ConstantReconnectionPolicy(cassandraProperties.getReconnectDelay());
+        return new ExponentialReconnectionPolicy(1000, cassandraProperties.getReconnectDelay());
     }
 
     /**
@@ -290,15 +295,17 @@ public class CassandraConfig extends AbstractCassandraConfiguration {
     @Nullable
     @Override
     public QueryOptions getQueryOptions() {
-        QueryOptions queryOptions = new QueryOptions();
-        queryOptions.setConsistencyLevel(cassandraProperties.getConsistencyLevel());
-        queryOptions.setSerialConsistencyLevel(cassandraProperties.getSerialConsistencyLevel());
-        return queryOptions;
+        PropertyMapper map = PropertyMapper.get();
+        QueryOptions options = new QueryOptions();
+        map.from(cassandraProperties::getConsistencyLevel).whenNonNull().to(options::setConsistencyLevel);
+        map.from(cassandraProperties::getSerialConsistencyLevel).whenNonNull().to(options::setSerialConsistencyLevel);
+        map.from(cassandraProperties::getFetchSize).to(options::setFetchSize);
+        return options;
     }
 
     /**
      * Returns the {@link LatencyTracker}.
-     * 
+     *
      * @return the {@link LatencyTracker}.
      */
     public LatencyTracker getLatencyTracker() {
@@ -306,12 +313,12 @@ public class CassandraConfig extends AbstractCassandraConfiguration {
     }
 
     /**
-     * 
+     *
      * @return the {@link SSLOptions}
      */
     private SSLOptions getSslOptions() {
         String[] cipherSuites = { "TLS_RSA_WITH_AES_128_CBC_SHA", "TLS_RSA_WITH_AES_256_CBC_SHA" };
-        return new FISSLOptions(getSslContext(), cipherSuites);
+        return new FISslOptions(getSslContext(), cipherSuites);
     }
 
     /**
@@ -323,6 +330,36 @@ public class CassandraConfig extends AbstractCassandraConfiguration {
     @Override
     public LoadBalancingPolicy getLoadBalancingPolicy() {
         return DCAwareRoundRobinPolicy.builder().build();
+    }
+
+    /**
+     * Returns the {@link CompressionType}.
+     *
+     * @return the {@link CompressionType}, may be {@literal null}.
+     */
+    @Nullable
+    @Override
+    public CompressionType getCompressionType() {
+        return cassandraProperties.getCompression();
+    }
+
+    /**
+     * Returns the {@link PoolingOptions}.
+     *
+     * @return the {@link PoolingOptions}, may be {@literal null}.
+     */
+    @Nullable
+    @Override
+    public PoolingOptions getPoolingOptions() {
+        CassandraProperties.Pool pool = cassandraProperties.getPool();
+        PropertyMapper map = PropertyMapper.get();
+        PoolingOptions options = new PoolingOptions();
+        map.from(pool::getIdleTimeout).whenNonNull().asInt(Duration::getSeconds).to(options::setIdleTimeoutSeconds);
+        map.from(pool::getPoolTimeout).whenNonNull().asInt(Duration::toMillis).to(options::setPoolTimeoutMillis);
+        map.from(pool::getHeartbeatInterval).whenNonNull().asInt(Duration::getSeconds)
+                .to(options::setHeartbeatIntervalSeconds);
+        map.from(pool::getMaxQueueSize).to(options::setMaxQueueSize);
+        return options;
     }
 
     private SSLContext getSslContext() {

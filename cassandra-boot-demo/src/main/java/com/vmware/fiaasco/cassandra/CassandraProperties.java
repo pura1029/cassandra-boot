@@ -18,12 +18,13 @@ import java.time.temporal.ChronoUnit;
 
 import com.datastax.driver.core.ConsistencyLevel;
 import com.datastax.driver.core.ProtocolOptions;
-import com.datastax.driver.core.ProtocolOptions.Compression;
 import com.datastax.driver.core.QueryOptions;
+import com.datastax.driver.core.SocketOptions;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.convert.DurationUnit;
 import org.springframework.data.cassandra.config.CassandraClusterFactoryBean;
+import org.springframework.data.cassandra.config.CompressionType;
 import org.springframework.data.cassandra.config.SchemaAction;
 import org.springframework.stereotype.Component;
 
@@ -70,7 +71,7 @@ public class CassandraProperties {
     /**
      * Compression supported by the Cassandra binary protocol.
      */
-    private Compression compression = Compression.NONE;
+    private CompressionType compression = CompressionType.NONE;
 
     /**
      * Queries consistency level.
@@ -90,12 +91,12 @@ public class CassandraProperties {
     /**
      * Socket option: connection time out.
      */
-    private int connectTimeout;
+    private int connectTimeout = SocketOptions.DEFAULT_CONNECT_TIMEOUT_MILLIS;
 
     /**
      * Socket option: read time out.
      */
-    private int readTimeout;
+    private int readTimeout = SocketOptions.DEFAULT_READ_TIMEOUT_MILLIS;
 
     /**
      * Schema action to take at startup.

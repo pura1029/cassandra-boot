@@ -22,9 +22,9 @@ import com.datastax.driver.core.RemoteEndpointAwareJdkSSLOptions;
  *
  * @author kumargautam
  */
-public class FISSLOptions extends RemoteEndpointAwareJdkSSLOptions {
+public class FISslOptions extends RemoteEndpointAwareJdkSSLOptions {
 
-    public FISSLOptions(SSLContext context, String[] cipherSuites) {
+    public FISslOptions(SSLContext context, String[] cipherSuites) {
         super(context, cipherSuites);
     }
 }

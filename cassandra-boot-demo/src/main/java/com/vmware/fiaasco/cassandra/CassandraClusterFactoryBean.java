@@ -1,3 +1,16 @@
+/*
+ * Copyright (c) 2018 VMware, Inc. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License.  You may obtain a copy of
+ * the License at http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed
+ * under the License is distributed on an "AS IS" BASIS, without warranties or
+ * conditions of any kind, EITHER EXPRESS OR IMPLIED.  See the License for the
+ * specific language governing permissions and limitations under the License.
+ */
+
 package com.vmware.fiaasco.cassandra;
 
 import java.net.InetSocketAddress;
@@ -71,23 +84,15 @@ import org.springframework.util.StringUtils;
  * <strong>XML configuration</strong>
  *
  * <pre class="code">
-     <cql:cluster contact-points="â€¦"
-				  port="${build.cassandra.native_transport_port}" compression=
+     <cql:cluster contact-points="â€¦" port="${build.cassandra.native_transport_port}" compression=
 "SNAPPY" netty-options-ref="nettyOptions">
-		<cql:local-pooling-options
-				min-simultaneous-requests="26" max-simultaneous-requests="101"
-				core-connections="3" max-connections="9"/>
-		<cql:remote-pooling-options
-				min-simultaneous-requests="25" max-simultaneous-requests="100"
-				core-connections="1" max-connections="2"/>
-		<cql:socket-options connect-timeout-millis="5000"
-							 keep-alive="true" reuse-address=
-"true" so-linger="60" tcp-no-delay="true"
-							 receive-buffer-size=
-"65536" send-buffer-size="65536"/>
-		<cql:keyspace name="${cassandra.keyspace}" action="CREATE_DROP"
-					   durable-writes="true"/>
-	</cass:cluster>
+         <cql:local-pooling-options min-simultaneous-requests="26" max-simultaneous-requests=
+"101" core-connections="3" max-connections="9"/>
+         <cql:remote-pooling-options min-simultaneous-requests="25" max-simultaneous-requests="100", core-connections="1" max-connections="2"/>
+         <cql:socket-options connect-timeout-millis="5000" keep-alive="true" reuse-address=
+"true" so-linger="60" tcp-no-delay="true" receive-buffer-size="65536" send-buffer-size="65536"/>
+         <cql:keyspace name="${cassandra.keyspace}" action="CREATE_DROP" durable-writes="true"/>
+     </cass:cluster>
  * </pre>
  *
  * @author Alex Shvid
@@ -253,7 +258,7 @@ public class CassandraClusterFactoryBean implements FactoryBean<Cluster>, Initia
     /**
      * default url code:
      * clusterBuilder.addContactPoints(StringUtils.commaDelimitedListToStringArray(contactPoints)).withPort(port);
-     * 
+     *
      * @return
      */
     private List<InetSocketAddress> formCassandraUrl() {
@@ -280,7 +285,6 @@ public class CassandraClusterFactoryBean implements FactoryBean<Cluster>, Initia
     public void destroy() {
 
         if (cluster != null) {
-
             executeSpecsAndScripts(keyspaceDrops, shutdownScripts, cluster);
             cluster.close();
         }
@@ -327,7 +331,6 @@ public class CassandraClusterFactoryBean implements FactoryBean<Cluster>, Initia
      * KeyspaceSpecification from them.
      */
     private void generateSpecificationsFromFactoryBeans() {
-
         generateSpecifications(keyspaceSpecifications);
         keyspaceActions.forEach(actions -> generateSpecifications(actions.getActions()));
     }
@@ -335,7 +338,6 @@ public class CassandraClusterFactoryBean implements FactoryBean<Cluster>, Initia
     private void generateSpecifications(Collection<KeyspaceActionSpecification> specifications) {
 
         specifications.forEach(keyspaceActionSpecification -> {
-
             if (keyspaceActionSpecification instanceof CreateKeyspaceSpecification) {
                 keyspaceCreations.add((CreateKeyspaceSpecification) keyspaceActionSpecification);
             }
@@ -354,15 +356,11 @@ public class CassandraClusterFactoryBean implements FactoryBean<Cluster>, Initia
             List<String> scripts, Cluster cluster) {
 
         if (!CollectionUtils.isEmpty(keyspaceActionSpecifications) || !CollectionUtils.isEmpty(scripts)) {
-
             Session session = cluster.connect();
-
             try {
                 CqlTemplate template = new CqlTemplate(session);
-
                 keyspaceActionSpecifications
                         .forEach(keyspaceActionSpecification -> template.execute(toCql(keyspaceActionSpecification)));
-
                 scripts.forEach(template::execute);
             } finally {
                 if (session != null) {
@@ -796,7 +794,6 @@ public class CassandraClusterFactoryBean implements FactoryBean<Cluster>, Initia
     }
 
     private static Compression convertCompressionType(CompressionType type) {
-
         switch (type) {
         case NONE:
             return Compression.NONE;
@@ -804,8 +801,8 @@ public class CassandraClusterFactoryBean implements FactoryBean<Cluster>, Initia
             return Compression.SNAPPY;
         case LZ4:
             return Compression.LZ4;
+        default:
+            throw new IllegalArgumentException(String.format("Unknown compression type [%s]", type));
         }
-
-        throw new IllegalArgumentException(String.format("Unknown compression type [%s]", type));
     }
 }
