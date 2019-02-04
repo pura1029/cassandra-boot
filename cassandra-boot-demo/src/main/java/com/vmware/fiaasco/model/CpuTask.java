@@ -13,8 +13,9 @@
 
 package com.vmware.fiaasco.model;
 
+import com.datastax.driver.mapping.annotations.Column;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
+import org.springframework.data.cassandra.core.mapping.PrimaryKey;
 import org.springframework.data.cassandra.core.mapping.Table;
 
 /**
@@ -24,9 +25,22 @@ import org.springframework.data.cassandra.core.mapping.Table;
  */
 @Table("task")
 @Data
-@EqualsAndHashCode(callSuper = true)
-public class CpuTask extends Task {
+public class CpuTask implements Task {
 
     private long time;
     private String taskDesc;
+    private String taskId;
+    private String taskName;
+
+    @Override
+    @PrimaryKey
+    public String getTaskId() {
+        return taskId;
+    }
+
+    @Override
+    @Column
+    public String getTaskName() {
+        return taskName;
+    }
 }

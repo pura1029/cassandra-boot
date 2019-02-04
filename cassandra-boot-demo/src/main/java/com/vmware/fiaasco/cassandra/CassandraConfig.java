@@ -19,21 +19,11 @@ import java.security.cert.X509Certificate;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
-import com.datastax.driver.core.LatencyTracker;
-import com.datastax.driver.core.PoolingOptions;
-import com.datastax.driver.core.QueryLogger;
-import com.datastax.driver.core.QueryOptions;
-import com.datastax.driver.core.SSLOptions;
-import com.datastax.driver.core.SocketOptions;
-import com.datastax.driver.core.policies.DCAwareRoundRobinPolicy;
-import com.datastax.driver.core.policies.ExponentialReconnectionPolicy;
-import com.datastax.driver.core.policies.LoadBalancingPolicy;
-import com.datastax.driver.core.policies.ReconnectionPolicy;
-import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.context.properties.PropertyMapper;
@@ -47,6 +37,20 @@ import org.springframework.data.cassandra.core.CassandraAdminTemplate;
 import org.springframework.data.cassandra.core.cql.session.DefaultSessionFactory;
 import org.springframework.data.cassandra.core.mapping.Table;
 import org.springframework.lang.Nullable;
+
+import com.datastax.driver.core.LatencyTracker;
+import com.datastax.driver.core.PoolingOptions;
+import com.datastax.driver.core.QueryLogger;
+import com.datastax.driver.core.QueryOptions;
+import com.datastax.driver.core.SSLOptions;
+import com.datastax.driver.core.SocketOptions;
+import com.datastax.driver.core.policies.DCAwareRoundRobinPolicy;
+import com.datastax.driver.core.policies.ExponentialReconnectionPolicy;
+import com.datastax.driver.core.policies.LoadBalancingPolicy;
+import com.datastax.driver.core.policies.ReconnectionPolicy;
+import com.vmware.fiaasco.cassandra.events.LoggingEventListener;
+
+import lombok.extern.log4j.Log4j2;
 
 /**
  * Base class for Spring Cassandra configuration that can handle creating namespaces, execute
@@ -391,5 +395,10 @@ public class CassandraConfig extends AbstractCassandraConfiguration {
             log.error(e.getMessage());
         }
         return null;
+    }
+
+    @Bean
+    public LoggingEventListener listener() {
+        return new LoggingEventListener();
     }
 }

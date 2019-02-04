@@ -13,35 +13,18 @@
 
 package com.vmware.fiaasco.model;
 
-import com.datastax.driver.mapping.annotations.Column;
 import lombok.Data;
-import org.springframework.data.cassandra.core.mapping.PrimaryKey;
-import org.springframework.data.cassandra.core.mapping.Table;
+import org.springframework.data.cassandra.core.mapping.UserDefinedType;
 
 /**
- * Insert your comment for DiskTask here
+ * Insert your comment for Coordinate here
  *
  * @author kumargautam
  */
-@Table("task")
+@UserDefinedType(value = "coordinate")
 @Data
-public class DiskTask implements Task {
+public class Coordinate {
 
-    private String taskDesc;
-    private Integer spaceToFull;
-    private String taskId;
-    private String taskName;
-
-    @Override
-    @PrimaryKey
-    public String getTaskId() {
-        return taskId;
-    }
-
-    @Override
-    @Column
-    public String getTaskName() {
-        return taskName;
-    }
-
+    private String latitude;
+    private String longitude;
 }

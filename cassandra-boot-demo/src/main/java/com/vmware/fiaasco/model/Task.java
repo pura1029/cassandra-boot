@@ -13,18 +13,17 @@
 
 package com.vmware.fiaasco.model;
 
-import lombok.Data;
-import org.springframework.data.cassandra.core.mapping.PrimaryKey;
+import com.datastax.driver.mapping.annotations.Transient;
 
 /**
  * Insert your comment for Task here
  *
  * @author kumargautam
  */
-@Data
-public class Task {
+public interface Task {
 
-    @PrimaryKey
-    private String taskId;
-    private String taskName;
+    @Transient
+    public String getTaskId();
+    @Transient
+    public String getTaskName();
 }

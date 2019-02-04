@@ -16,8 +16,10 @@ package com.vmware.fiaasco.model;
 import java.util.List;
 
 import com.datastax.driver.core.DataType.Name;
+import com.datastax.driver.mapping.annotations.Table;
 import lombok.Data;
 import org.springframework.data.cassandra.core.mapping.CassandraType;
+import org.springframework.data.cassandra.core.mapping.PrimaryKey;
 import org.springframework.data.cassandra.core.mapping.UserDefinedType;
 
 /**
@@ -26,6 +28,7 @@ import org.springframework.data.cassandra.core.mapping.UserDefinedType;
  * @author kumargautam
  */
 @UserDefinedType("address")
+@Table(name = "Address")
 @Data
 public class Address {
     @CassandraType(type = Name.VARCHAR)
@@ -33,9 +36,13 @@ public class Address {
 
     private String city;
 
+    @PrimaryKey(value = "addId")
+    private String id;
     private String zipcode;
-    
+
     @CassandraType(type = Name.LIST, typeArguments = Name.BIGINT)
     private List<Long> timestamps;
-    
+
+    private Coordinate coordinate;
+
 }
