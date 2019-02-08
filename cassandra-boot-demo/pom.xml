@@ -8,7 +8,7 @@
 		<version>2.1.2.RELEASE</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.vmware.fiaasco</groupId>
+	<groupId>com.gtm</groupId>
 	<artifactId>cassandra-boot-demo</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>cassandra-boot-demo</name>
